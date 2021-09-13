@@ -558,15 +558,19 @@ long shim_do_ftruncate(int fd, loff_t length) {
         return -EBADF;
 
     struct shim_fs* fs = hdl->fs;
-    int ret = -EINVAL;
+    int ret;
 
     if (!(hdl->acc_mode & MAY_WRITE)) {
+        /* Note that we return EINVAL here, not EBADF like in `read`/`write`. This is what Linux
+         * does. */
         ret = -EINVAL;
         goto out;
     }
 
-    if (!fs || !fs->fs_ops)
+    if (!fs || !fs->fs_ops) {
+        ret = -EINVAL;
         goto out;
+    }
 
     if (hdl->is_dir || !fs->fs_ops->truncate) {
         ret = -EINVAL;

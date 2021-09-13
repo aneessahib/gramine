@@ -387,11 +387,6 @@ static ssize_t chroot_read(struct shim_handle* hdl, void* buf, size_t count) {
 
     ssize_t ret;
 
-    if (count == 0) {
-        /* exit early: we allow null buffer when count is 0, and `DkStreamRead` doesn't allow it */
-        return 0;
-    }
-
     if (count > SSIZE_MAX)
         return -EFBIG;
 
@@ -428,11 +423,6 @@ static ssize_t chroot_write(struct shim_handle* hdl, const void* buf, size_t cou
     assert(hdl->type == TYPE_CHROOT);
 
     ssize_t ret;
-
-    if (count == 0) {
-        /* exit early: we allow null buffer when count is 0, and `DkStreamWrite` doesn't allow it */
-        return 0;
-    }
 
     if (count > SSIZE_MAX)
         return -EFBIG;
