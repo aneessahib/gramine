@@ -313,14 +313,11 @@ class TestRunner:
                 returncode = await self._run_cmd()
 
             must_pass = self.cfgsection.getintset('must-pass')
-            if must_pass is not None:
-                self._parse_test_output(must_pass)
-            elif returncode != 0:
+            if not must_pass and returncode != 0:
                 raise Fail('returncode={}'.format(returncode))
-            else:
-                # Parse output anyway: unfortunately some tests do not exit with non-zero code when
-                # failing.
-                self._parse_test_output()
+            # Parse output regardless of whether `must_pass` is specified: unfortunately some tests
+            # do not exit with non-zero code when failing.
+            self._parse_test_output(must_pass)
 
         except AbnormalTestResult as result:
             result.apply_to(self)
@@ -328,8 +325,8 @@ class TestRunner:
         else:
             self.success()
 
-    def _parse_test_output(self, must_pass=None):
-        '''Parse the output, returning a list of tests'''
+    def _parse_test_output(self, must_pass):
+        '''Parse and process test output'''
 
         if must_pass is None:
             must_pass = set()
