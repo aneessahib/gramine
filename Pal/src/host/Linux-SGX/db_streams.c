@@ -167,8 +167,10 @@ out:
         free((void*)d1);
     if (free_d2)
         free((void*)d2);
-    if (ret < 0)
+    if (ret < 0) {
+        free(buffer);
         return ret;
+    }
 
     *data = buffer;
     return hdlsz + dsz1 + dsz2;
