@@ -17,7 +17,7 @@ typedef bool (*child_cmp_t)(const struct libos_child_process*, unsigned long);
 
 struct libos_process g_process = { .pid = 0 };
 
-int init_process(int argc, const char** argv) {
+int init_process(void) {
     if (g_process.pid) {
         /* `g_process` is already initialized, e.g. via checkpointing code. */
         return 0;
@@ -56,10 +56,28 @@ int init_process(int argc, const char** argv) {
     /* `g_process.exec` will be initialized later on (in `init_important_handles`). */
     g_process.exec = NULL;
 
+    return 0;
+}
+
+int init_process_args(const char* path, const char** argv, char*** out_new_argv) {
+
+    struct libos_handle* dummy_exec = NULL;
+    int ret = load_and_check_exec(path, argv, &dummy_exec, out_new_argv);
+    if (ret < 0) {
+        log_error("libos_init: failed to load exec:%s  ret %d", argv[0], ret);
+        PalProcessExit(1);
+    }
+
+    if (dummy_exec)
+        put_handle(dummy_exec);
+
+    return 0;
+}
+
+int init_process_cmdline(int argc, const char** argv) {
     /* The command line arguments passed are stored in /proc/self/cmdline as part of the proc fs.
      * They are not separated by space, but by NUL instead. So, it is essential to maintain the
      * cmdline_size also as a member here. */
-
     g_process.cmdline_size = 0;
     memset(g_process.cmdline, '\0', ARRAY_SIZE(g_process.cmdline));
     size_t tmp_size = 0;
