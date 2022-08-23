@@ -18,7 +18,6 @@ sgx_util = shared_library('sgx_util',
     ],
     dependencies: [
         cjson_dep,
-        libcurl_dep,
         protected_files_dep,
         mbedtls_static_dep,
     ],
