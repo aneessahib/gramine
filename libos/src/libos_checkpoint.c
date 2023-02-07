@@ -281,13 +281,27 @@ static int send_handles_on_stream(PAL_HANDLE stream, struct libos_cp_store* stor
     }
     assert(!entry);
 
+    log_debug("Sending %lu PAL Handles", entries_cnt);
+
+    PAL_HANDLE goodcargo = NULL;
     /* now we can traverse PAL-handle entries in correct order and send them one by one */
     for (size_t i = 0; i < entries_cnt; i++) {
         /* we need to abort migration if PalSendHandle() returned error, otherwise app may fail */
+        log_debug("Sending %lu of %lu PAL Handles", i, entries_cnt);
         ret = PalSendHandle(stream, entries[i]->handle);
         if (ret < 0) {
+         //   ret = 0;
             ret = pal_to_unix_errno(ret);
-            goto out;
+            log_error("warning %d while sending PAL handle number %lu out of %lu handles, sending good cargo", ret, i, entries_cnt);
+            ret = PalSendHandle(stream, goodcargo);
+            if (ret < 0) {
+               ret = pal_to_unix_errno(ret);
+               log_error("error %d while sending good cargo PAL handle number %lu out of %lu handles", ret, i, entries_cnt);
+               goto out;
+            }
+        }
+        else {
+            goodcargo = entries[i]->handle;
         }
     }
 
