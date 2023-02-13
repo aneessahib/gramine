@@ -17,6 +17,7 @@ int _PalObjectClose(PAL_HANDLE object_handle) {
     int ret = 0;
 
     /* if the operation 'close' is defined, call the function. */
+    spinlock_lock(&g_sock_sync);
     if (ops->close)
         ret = ops->close(object_handle);
 
@@ -27,6 +28,8 @@ int _PalObjectClose(PAL_HANDLE object_handle) {
      */
     if (!ret)
         free(object_handle);
+
+    spinlock_unlock(&g_sock_sync);
 
     return ret;
 }

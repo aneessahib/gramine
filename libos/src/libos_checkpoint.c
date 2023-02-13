@@ -544,6 +544,7 @@ int create_process_and_send_checkpoint(migrate_func_t migrate_func,
         .alloc = cp_alloc,
         .bound = CP_INIT_VMA_SIZE,
     };
+    spinlock_lock(&g_sock_sync);
 
     while (1) {
         /* try allocating checkpoint; if allocation fails, try with smaller sizes */
@@ -657,6 +658,7 @@ int create_process_and_send_checkpoint(migrate_func_t migrate_func,
     ret = 0;
 
 out:
+    spinlock_unlock(&g_sock_sync);
     if (cpstore.base) {
         void* tmp_vma = NULL;
         int tmp_ret = bkeep_munmap((void*)cpstore.base, cpstore.bound, /*is_internal=*/true,

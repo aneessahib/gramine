@@ -418,7 +418,8 @@ int PalSendHandle(PAL_HANDLE target_process, PAL_HANDLE cargo) {
         return -PAL_ERROR_INVAL;
     }
 
-    return _PalSendHandle(target_process, cargo);
+    int ret = _PalSendHandle(target_process, cargo);
+    return ret;
 }
 
 int PalReceiveHandle(PAL_HANDLE source_process, PAL_HANDLE* out_cargo) {

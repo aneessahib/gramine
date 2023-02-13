@@ -13,6 +13,7 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <stdnoreturn.h>
+#include "spinlock.h"
 
 #include "iovec.h"
 
@@ -22,6 +23,8 @@
 #if defined(__i386__) || defined(__x86_64__)
 #include "cpu.h"
 #endif
+
+static spinlock_t g_sock_sync = INIT_SPINLOCK_UNLOCKED;
 
 /* TODO: we should `#include "toml.h"` here. However, this is currently inconvenient to do in Meson,
  * because `toml.h` is a generated (patched) file, and all targets built using `pal.h` would need to
