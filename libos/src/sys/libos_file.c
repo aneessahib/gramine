@@ -70,7 +70,7 @@ long libos_syscall_unlinkat(int dfd, const char* pathname, int flag) {
     }
 
     put_inode(dent->inode);
-    dent->inode = NULL;
+    //dent->inode = NULL;
     ret = 0;
 out:
     unlock(&g_dcache_lock);

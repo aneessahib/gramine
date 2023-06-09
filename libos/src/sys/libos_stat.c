@@ -44,9 +44,10 @@ static int do_hstat(struct libos_handle* hdl, struct stat* stat) {
         return ret;
 
     /* Update `st_ino` from dentry */
-    if (hdl->dentry)
+    if (hdl->dentry){
         stat->st_ino = dentry_ino(hdl->dentry);
-
+	stat->st_ctime=hdl->dentry->inode->ctime;
+    }
     return 0;
 }
 
