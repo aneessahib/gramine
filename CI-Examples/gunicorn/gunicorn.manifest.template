@@ -1,0 +1,53 @@
+# Python3 manifest example
+
+loader.entrypoint = "file:{{ gramine.libos }}"
+libos.entrypoint = "/usr/bin/gunicorn"
+#loader.log_level = "all"#"{{ log_level }}"
+
+#loader.env.FLASK_APP = "app"
+loader.env.FLASK_ENV = "development"
+loader.insecure__use_cmdline_argv = true
+loader.insecure__use_host_env = true
+#loader.pal_internal_memory_size = "256M"
+
+sys.enable_sigterm_injection = true
+
+loader.env.LD_LIBRARY_PATH = "{{ python.stdlib }}/lib:/lib:{{ arch_libdir }}:/usr/lib:/usr/{{ arch_libdir }}:{{env.HOME}}/.local/lib"
+fs.mounts = [
+  { path = "/lib/", uri = "file:{{ gramine.runtimedir() }}" },
+  { path = "{{ arch_libdir }}", uri = "file:{{ arch_libdir }}" },
+  { path = "/usr/{{ arch_libdir }}", uri = "file:/usr/{{ arch_libdir }}" },
+  { path = "/usr", uri = "file:/usr" },
+  { path = "{{ python.stdlib }}", uri = "file:{{ python.stdlib }}" },
+  { path = "{{ python.distlib }}", uri = "file:{{ python.distlib }}" },
+  { path = "{{env.HOME}}/.local/", uri = "file:{{ env.HOME }}/.local" },
+  { path = "{{env.HOME}}/.cache/", uri = "file:{{ env.HOME }}/.cache" },
+  { path = "/etc", uri = "file:/etc" },
+  { type = "tmpfs", path = "/tmp" },
+]
+sys.stack.size = "2M"
+sys.enable_extra_runtime_domain_names_conf = true
+
+sgx.debug = true
+sgx.nonpie_binary = true
+sgx.enclave_size = "8G" #"32G"
+sgx.max_threads = 64 #1024
+sgx.file_check_policy = "allow_all_but_log"
+
+sgx.remote_attestation = "{{ ra_type }}"
+sgx.ra_client_spid = "{{ ra_client_spid }}"
+sgx.ra_client_linkable = {{ 'true' if ra_client_linkable == '1' else 'false' }}
+sys.brk.max_size = "2M"
+sgx.preheat_enclave = true
+
+sgx.trusted_files = [
+  "file:{{ gramine.libos }}",
+  "file:{{ entrypoint }}",
+  "file:{{ gramine.runtimedir() }}/",
+  "file:{{ arch_libdir }}/",
+  "file:/usr/{{ arch_libdir }}/",
+{% for path in python.get_sys_path(entrypoint) %}
+  "file:{{ path }}{{ '/' if path.is_dir() else '' }}",
+{% endfor %}
+#  "file:../../helper-files/",
+]
